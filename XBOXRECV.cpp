@@ -544,8 +544,8 @@ bool XBOXRECV::getChatpadModifierPress(ChatpadModiferEnum b, uint8_t controller)
 
 bool XBOXRECV::getChatpadModifierClick(ChatpadModiferEnum b, uint8_t controller) {
         uint8_t mask = (1 << b);
-        bool click = (chatpadClickState[controller] & mask);
-        chatpadClickState[controller] &= ~mask; // clear "click" event
+        bool click = (chatpadModClickState[controller] & mask);
+        chatpadModClickState[controller] &= ~mask; // clear "click" event
         return click;
 }
 
