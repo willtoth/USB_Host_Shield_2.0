@@ -294,6 +294,7 @@ private:
         bool firstChatpadRun = true;
         bool chatpadInitNeeded[4] = { true };
         uint8_t chatpadModState[4] = {0};
+        uint8_t chatpadModStateLast[4] = {0};
         uint8_t chatpadDataPacketLast[4][3];
         bool flagUpperCase = false;
 
