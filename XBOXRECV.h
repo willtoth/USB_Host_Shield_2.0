@@ -22,6 +22,7 @@
 
 #include "Usb.h"
 #include "xboxEnums.h"
+#include "XBOXChatpadEnums.h"
 
 /* Data Xbox 360 taken from descriptors */
 #define EP_MAXPKTSIZE       32 // max size for data via USB
@@ -223,6 +224,17 @@ public:
         void attachOnInit(void (*funcOnInit)(void)) {
                 pFuncOnInit = funcOnInit;
         };
+
+        uint8_t getChatpadPress(ChatpadButtonEnum b, uint8_t controller = 0);
+        bool getChatpadClick(ChatpadButtonEnum b, uint8_t controller = 0);
+        bool chatpadChanged(uint8_t controller);
+
+        /**
+         * Set the chatpad LEDs on or off
+         * @param  ledNumber Capslock = 0, Green = 1, Orange = 2, Messanger = 3
+         * @param  controller The controller to read from. Default to 0.
+         */
+        void setChatpadLed(uint8_t ledNumber, bool value, uint8_t controller = 0);
         /**@}*/
 
         /** True if a wireless receiver is connected. */
@@ -272,5 +284,23 @@ private:
         /* Private commands */
         void XboxCommand(uint8_t controller, uint8_t* data, uint16_t nbytes);
         void checkStatus();
+
+        /* Chatpad Commands */
+        void sendChatpadInitIfNeeded();
+        void processChatpadData(uint8_t controller, uint8_t*  epBuffer);
+        void ProcessChatpadKeypress(uint8_t controller, uint8_t value);
+
+        /* Chatpad State */        
+        bool firstChatpadRun = true;
+        bool chatpadInitNeeded[4] = { true };
+        bool chatpadMod[4][5] = { false };
+        uint8_t chatpadDataPacketLast[4][3];
+        bool flagUpperCase = false;
+
+        /* Variables to store chatpad buttons */
+        uint64_t chatpadState[4];
+        uint64_t chatpadOldState[4];
+        uint64_t chatpadClickState[4];
+        bool chatpadStateChanged[4]; // True if a button has changed
 };
 #endif
