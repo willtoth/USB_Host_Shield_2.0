@@ -479,7 +479,7 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
 
                         if (chatpadModState[controller] != chatpadModStateLast[controller]) {
                                 for (int i = 0; i < 4; i ++) {
-                                        setChatpadLed(i, (bool)(1 << i));
+                                        setChatpadLed((ChatpadLEDEnum)i, (bool)(1 << i) & chatpadModState[controller]);
                                 }
                                 chatpadModStateLast[controller] = chatpadModState[controller];
                         }
