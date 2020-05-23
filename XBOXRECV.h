@@ -227,7 +227,7 @@ public:
 
         uint8_t getChatpadPress(ChatpadButtonEnum b, uint8_t controller = 0);
         bool getChatpadClick(ChatpadButtonEnum b, uint8_t controller = 0);
-        bool chatpadChanged(uint8_t controller);
+        bool chatpadChanged(uint8_t controller = 0);
 
         /**
          * Set the chatpad LEDs on or off
