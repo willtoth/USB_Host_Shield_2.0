@@ -84,4 +84,3 @@ enum ChatpadButtonEnum {
 };
 
 #endif
-

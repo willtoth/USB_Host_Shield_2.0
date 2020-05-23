@@ -225,8 +225,7 @@ public:
                 pFuncOnInit = funcOnInit;
         };
 
-        bool getChatpadModifierPress(ChatpadModiferEnum b, uint8_t controller = 0);
-        bool getChatpadModifierClick(ChatpadModiferEnum b, uint8_t controller = 0);
+        bool getChatpadModifier(ChatpadModiferEnum b, uint8_t controller = 0);
         bool getChatpadClick(ChatpadButtonEnum b, uint8_t controller = 0);
         bool chatpadChanged(uint8_t controller = 0);
 
@@ -295,8 +294,6 @@ private:
         bool firstChatpadRun = true;
         bool chatpadInitNeeded[4] = { true };
         uint8_t chatpadModState[4] = {0};
-        uint8_t chatpadModStateOld[4] = {0};
-        uint8_t chatpadModClickState[4] = {0};
         uint8_t chatpadDataPacketLast[4][3];
         bool flagUpperCase = false;
 
