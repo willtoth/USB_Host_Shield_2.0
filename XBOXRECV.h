@@ -225,7 +225,8 @@ public:
                 pFuncOnInit = funcOnInit;
         };
 
-        uint8_t getChatpadPress(ChatpadButtonEnum b, uint8_t controller = 0);
+        bool getChatpadModifierPress(ChatpadModiferEnum b, uint8_t controller = 0);
+        bool getChatpadModifierClick(ChatpadModiferEnum b, uint8_t controller = 0);
         bool getChatpadClick(ChatpadButtonEnum b, uint8_t controller = 0);
         bool chatpadChanged(uint8_t controller = 0);
 
@@ -234,7 +235,7 @@ public:
          * @param  ledNumber Capslock = 0, Green = 1, Orange = 2, Messanger = 3
          * @param  controller The controller to read from. Default to 0.
          */
-        void setChatpadLed(uint8_t ledNumber, bool value, uint8_t controller = 0);
+        void setChatpadLed(ChatpadLEDEnum led, bool value, uint8_t controller = 0);
         /**@}*/
 
         /** True if a wireless receiver is connected. */
@@ -293,14 +294,15 @@ private:
         /* Chatpad State */        
         bool firstChatpadRun = true;
         bool chatpadInitNeeded[4] = { true };
-        bool chatpadMod[4][5] = { false };
+        uint8_t chatpadModState[4] = {0};
+        uint8_t chatpadModStateOld[4] = {0};
+        uint8_t chatpadModClickState[4] = {0};
         uint8_t chatpadDataPacketLast[4][3];
         bool flagUpperCase = false;
 
         /* Variables to store chatpad buttons */
-        uint64_t chatpadState[4];
-        uint64_t chatpadOldState[4];
         uint64_t chatpadClickState[4];
+        uint64_t chatpadClickStateOld[4];
         bool chatpadStateChanged[4]; // True if a button has changed
 };
 #endif

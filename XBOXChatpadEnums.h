@@ -14,11 +14,17 @@
 #define _xbox_chatpad_enums_h_
 
 enum ChatpadModiferEnum {
-        MODIFER_GREENBUTTON = 0,
-        MODIFER_ORANGEBUTTON = 1,
-        MODIFER_CAPSLOCK = 2,
-        MODIFER_SHIFT = 3,
-        MODIFER_MESSENGER = 4
+        MODIFER_SHIFT = 0,
+        MODIFER_GREENBUTTON = 1,
+        MODIFER_ORANGEBUTTON = 2,
+        MODIFER_MESSENGER = 3
+};
+
+enum ChatpadLEDEnum {
+        CHATPADLED_CAPSLOCK = 0,
+        CHATPADLED_GREEN = 1,
+        CHATPADLED_ORANGE = 2,
+        CHATPADLED_MESSENGER = 3,
 };
 
 /** Buttons on the chatpad
@@ -50,7 +56,7 @@ enum ChatpadButtonEnum {
         XBOX_CHATPAD_S = 19,
         XBOX_CHATPAD_A = 20,
 
-        XBOX_CHATPAD_M = 21,
+        XBOX_CHATPAD_M = 31,
         XBOX_CHATPAD_N = 22,
         XBOX_CHATPAD_B = 23,
         XBOX_CHATPAD_V = 24,
@@ -58,22 +64,23 @@ enum ChatpadButtonEnum {
         XBOX_CHATPAD_X = 26,
         XBOX_CHATPAD_Z = 27,
 
-        XBOX_CHATPAD_RIGHT = 28,
-        XBOX_CHATPAD_SPACE = 29,
-        XBOX_CHATPAD_LEFT = 30,
+        XBOX_CHATPAD_RIGHT = 30,
+        XBOX_CHATPAD_SPACE = 33,
+        XBOX_CHATPAD_LEFT = 34,
 
-        XBOX_CHATPAD_COMMA = 31,
-        XBOX_CHATPAD_ENTER = 32,
-        XBOX_CHATPAD_P = 33,
-        XBOX_CHATPAD_D0 = 34,
-        XBOX_CHATPAD_D9 = 35,
-        XBOX_CHATPAD_D8 = 36,
+        XBOX_CHATPAD_COMMA = 39,
+        XBOX_CHATPAD_PERIOD = 32,
+        XBOX_CHATPAD_ENTER = 40,
+        XBOX_CHATPAD_P = 41,
+        XBOX_CHATPAD_D0 = 42,
+        XBOX_CHATPAD_D9 = 43,
+        XBOX_CHATPAD_D8 = 44,
 
-        XBOX_CHATPAD_BACK = 37,
-        XBOX_CHATPAD_L = 38,
-        XBOX_CHATPAD_O = 39,
-        XBOX_CHATPAD_I = 40,
-        XBOX_CHATPAD_K = 41
+        XBOX_CHATPAD_BACK = 46,
+        XBOX_CHATPAD_L = 47,
+        XBOX_CHATPAD_O = 50,
+        XBOX_CHATPAD_I = 51,
+        XBOX_CHATPAD_K = 52
 };
 
 #endif
