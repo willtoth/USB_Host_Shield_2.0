@@ -482,7 +482,9 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
                                 chatpadModState[controller] = (chatpadModRaw[controller]) & ((~chatpadModRawOld[controller]));
                                 chatpadModRawOld[controller] = chatpadModRaw[controller];
 
-                                setChatpadLed( (ChatpadLEDEnum)i, (1 << i) & chatpadModState[controller]);
+                                for (int i = 0; i < __NUM_CHATPAD_LED; i++) {
+                                        setChatpadLed( (ChatpadLEDEnum)i, (1 << i) & chatpadModState[controller]);
+                                }
                         }
                 }
         }
