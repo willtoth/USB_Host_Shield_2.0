@@ -466,7 +466,7 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
                 if (dataChanged)
                 {
                         // Record the Modifier Statuses
-                        chatpadModState[controller] = dataPacket[25];
+                        chatpadModRaw[controller] = dataPacket[25];
 
                         // Process the two different possible keys that could be held down
                         ProcessChatpadKeypress(controller, dataPacket[26]);
@@ -477,10 +477,12 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
                                 chatpadClickStateOld[controller] = chatpadClickState[controller];
                         }
 
-                        if(chatpadModState[controller] != chatpadModStateOld[controller]) {
+                        if(chatpadModRaw[controller] != chatpadModRawOld[controller]) {
                                 // Update click state variable
-                                chatpadModClickState[controller] = (chatpadModState[controller]) & ((~chatpadModStateOld[controller]));
-                                chatpadModStateOld[controller] = chatpadModState[controller];
+                                chatpadModState[controller] = (chatpadModRaw[controller]) & ((~chatpadModRawOld[controller]));
+                                chatpadModRawOld[controller] = chatpadModRaw[controller];
+
+                                setChatpadLed( (ChatpadLEDEnum)i, (1 << i) & chatpadModState[controller]);
                         }
                 }
         }
@@ -492,12 +494,12 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
 void XBOXRECV::ProcessChatpadKeypress(uint8_t controller, uint8_t value) {
         value = (((value & 0xF0) - 0x10) >> 1) | ((value & 0x0F) - 1);
 
-        if (value > 50) {
+        if (value > __XBOX_CHATPAD_ENUM_MAX) {
                 // Invalid button
                 return;
         }
 
-        chatpadClickState[controller] |= (1 << value);
+        chatpadClickState[controller] |= (((uint64_t)1) << ((uint64_t)value));
 }
 
 uint8_t XBOXRECV::getButtonPress(ButtonEnum b, uint8_t controller) {
@@ -538,15 +540,8 @@ bool XBOXRECV::buttonChanged(uint8_t controller) {
         return state;
 }
 
-bool XBOXRECV::getChatpadModifierPress(ChatpadModiferEnum b, uint8_t controller) {
+bool XBOXRECV::getChatpadModifier(ChatpadModiferEnum b, uint8_t controller) {
         return (bool)(chatpadModState[controller] & (1 << b));
-}
-
-bool XBOXRECV::getChatpadModifierClick(ChatpadModiferEnum b, uint8_t controller) {
-        uint8_t mask = (1 << b);
-        bool click = (chatpadModClickState[controller] & mask);
-        chatpadModClickState[controller] &= ~mask; // clear "click" event
-        return click;
 }
 
 bool XBOXRECV::chatpadChanged(uint8_t controller) {
@@ -556,7 +551,7 @@ bool XBOXRECV::chatpadChanged(uint8_t controller) {
 }
 
 bool XBOXRECV::getChatpadClick(ChatpadButtonEnum b, uint8_t controller) {
-        uint64_t mask = ((uint64_t)(1 << b));
+        uint64_t mask = ((uint64_t)1) << ((uint64_t)b);
         bool click = (chatpadClickState[controller] & mask);
         chatpadClickState[controller] &= ~mask; // clear "click" event
         return click;
@@ -751,3 +746,4 @@ void XBOXRECV::onInit(uint8_t controller) {
                 setLedOn(led, controller);
         }
 }
+
