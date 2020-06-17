@@ -25,6 +25,8 @@ enum ChatpadLEDEnum {
         CHATPADLED_GREEN = 1,
         CHATPADLED_ORANGE = 2,
         CHATPADLED_MESSENGER = 3,
+        
+        __NUM_CHATPAD_LED
 };
 
 /** Buttons on the chatpad
@@ -80,7 +82,9 @@ enum ChatpadButtonEnum {
         XBOX_CHATPAD_L = 49,
         XBOX_CHATPAD_O = 52,
         XBOX_CHATPAD_I = 53,
-        XBOX_CHATPAD_K = 54
+        XBOX_CHATPAD_K = 54,
+
+        __XBOX_CHATPAD_ENUM_MAX
 };
 
 #endif
