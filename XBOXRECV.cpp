@@ -298,6 +298,8 @@ uint8_t XBOXRECV::Poll() {
                 checkStatus();
         }
 
+        sendChatpadInitIfNeeded();
+
         uint8_t inputPipe;
         uint16_t bufferSize;
         for(uint8_t i = 0; i < 4; i++) {
@@ -364,6 +366,11 @@ void XBOXRECV::readReport(uint8_t controller) {
                 controllerStatus[controller] = ((uint16_t)readBuf[3] << 8) | readBuf[4];
                 return;
         }
+        if(readBuf[1] == 0x02) {
+                // Chatpad data
+                processChatpadData(controller, readBuf);
+                return;
+        }
         if(readBuf[1] != 0x01) // Check if it's the correct report - the receiver also sends different status reports
                 return;
 
@@ -407,6 +414,92 @@ void XBOXRECV::printReport(uint8_t controller __attribute__((unused)), uint8_t n
 #endif
 }
 
+
+void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
+        // This function is called anytime received data is identified as chatpad data
+        // It will parse the data, and depending on the value, send a keyboard command,
+        // adjust a modifier for later use, flag initialization, or note the LED status.
+        if (dataPacket[24] == 0xF0) {
+                if (dataPacket[25] == 0x03) {
+                        // This data represents handshake request, flag keep-alive to send
+                        // chatpad initialization data.
+                        chatpadInitNeeded[controller] = true;
+                }
+                else if (dataPacket[25] == 0x04) {
+                        // This data represents the LED status. Not used because unsure of workings
+                        //chatpadLED["Green"] = (dataPacket[26] & 0x08) > 0;
+                        //chatpadLED["Orange"] = (dataPacket[26] & 0x10) > 0;
+                        //chatpadLED["Messenger"] = (dataPacket[26] & 0x01) > 0;
+                        //chatpadLED["Capslock"] = (dataPacket[26] & 0x20) > 0;
+                        //Backlight = (dataPacket[26] & 0x80) > 0;
+                }
+                else {
+                        // TODO: How to deal with invalid data?
+                        return;
+                }
+        }
+        else if (dataPacket[24] == 0x00) {
+                // This data represents a key-press event
+                // Check if anything has changed since the last dataPacket
+                bool dataChanged = false;
+                if (!firstChatpadRun) {
+                        if (chatpadDataPacketLast[controller][0] != dataPacket[25]) {
+                                dataChanged = true;
+                        }
+                        else if (chatpadDataPacketLast[controller][1] != dataPacket[26]) {
+                                dataChanged = true;
+                        }
+                        else if (chatpadDataPacketLast[controller][2] != dataPacket[27]) {
+                                dataChanged = true;
+                        }
+                }
+                else {
+                        firstChatpadRun = false;
+                        dataChanged = true;
+                }
+
+                // Store bits 25-27 of the data packet for later comparison
+                chatpadDataPacketLast[controller][0] = dataPacket[25];
+                chatpadDataPacketLast[controller][1] = dataPacket[26];
+                chatpadDataPacketLast[controller][2] = dataPacket[27];
+
+                if (dataChanged)
+                {
+                        // Record the Modifier Statuses
+                        chatpadModState[controller] = dataPacket[25];
+
+                        // Process the two different possible keys that could be held down
+                        ProcessChatpadKeypress(controller, dataPacket[26]);
+                        ProcessChatpadKeypress(controller, dataPacket[27]);
+
+                        if(chatpadClickState[controller] != chatpadClickStateOld[controller]) {
+                                chatpadStateChanged[controller] = true;
+                                chatpadClickStateOld[controller] = chatpadClickState[controller];
+                        }
+
+                        if(chatpadModState[controller] != chatpadModStateOld[controller]) {
+                                // Update click state variable
+                                chatpadModClickState[controller] = (chatpadModState[controller]) & ((~chatpadModStateOld[controller]));
+                                chatpadModStateOld[controller] = chatpadModState[controller];
+                        }
+                }
+        }
+        else {
+                // TODO: Handle invalid data
+        }
+}
+
+void XBOXRECV::ProcessChatpadKeypress(uint8_t controller, uint8_t value) {
+        value = (((value & 0xF0) - 0x10) >> 1) | ((value & 0x0F) - 1);
+
+        if (value > __XBOX_CHATPAD_ENUM_MAX) {
+                // Invalid button
+                return;
+        }
+
+                chatpadClickState[controller] |= (((uint64_t)1) << ((uint64_t)value));
+}
+
 uint8_t XBOXRECV::getButtonPress(ButtonEnum b, uint8_t controller) {
         if(b == L2) // These are analog buttons
                 return (uint8_t)(ButtonState[controller] >> 8);
@@ -443,6 +536,30 @@ bool XBOXRECV::buttonChanged(uint8_t controller) {
         bool state = buttonStateChanged[controller];
         buttonStateChanged[controller] = false;
         return state;
+}
+
+bool XBOXRECV::getChatpadModifierPress(ChatpadModiferEnum b, uint8_t controller) {
+        return (bool)(chatpadModState[controller] & (1 << b));
+}
+
+bool XBOXRECV::getChatpadModifierClick(ChatpadModiferEnum b, uint8_t controller) {
+        uint8_t mask = (1 << b);
+        bool click = (chatpadModClickState[controller] & mask);
+        chatpadModClickState[controller] &= ~mask; // clear "click" event
+        return click;
+}
+
+bool XBOXRECV::chatpadChanged(uint8_t controller) {
+        bool state = chatpadStateChanged[controller];
+        chatpadStateChanged[controller] = false;
+        return state;
+}
+
+bool XBOXRECV::getChatpadClick(ChatpadButtonEnum b, uint8_t controller) {
+        uint64_t mask = ((uint64_t)1) << ((uint64_t)b);
+        bool click = (chatpadClickState[controller] & mask);
+        chatpadClickState[controller] &= ~mask; // clear "click" event
+        return click;
 }
 
 /*
@@ -524,6 +641,22 @@ void XBOXRECV::setLedBlink(LEDEnum led, uint8_t controller) {
         setLedRaw(pgm_read_byte(&XBOX_LEDS[(uint8_t)led]), controller);
 }
 
+
+void XBOXRECV::setChatpadLed(ChatpadLEDEnum ledNumber, bool value, uint8_t controller) {
+        uint8_t ledOnByte[4] = {0x08, 0x09, 0x0A, 0x0B};
+        uint8_t ledOffByte[4] = {0x00, 0x01, 0x02, 0x03};
+        writeBuf[0] = 0x00;
+        writeBuf[1] = 0x00;
+        writeBuf[2] = 0x0C;
+
+        if (value) {
+                writeBuf[3] = 0x08 + ledNumber;
+        } else {
+                writeBuf[3] = ledNumber;                
+        }
+        XboxCommand(controller, writeBuf, 4);
+}
+
 void XBOXRECV::setLedMode(LEDModeEnum ledMode, uint8_t controller) { // This function is used to do some speciel LED stuff the controller supports
         setLedRaw((uint8_t)ledMode, controller);
 }
@@ -551,6 +684,42 @@ void XBOXRECV::checkStatus() {
         for(uint8_t i = 0; i < 4; i++) {
                 if(Xbox360Connected[i])
                         XboxCommand(i, writeBuf, 4);
+        }
+
+        // Keep Alive 1
+        writeBuf[0] = 0x00;
+        writeBuf[1] = 0x00;
+        writeBuf[2] = 0x0C;
+        writeBuf[3] = 0x1F;
+        for(uint8_t i = 0; i < 4; i++) {
+                if(Xbox360Connected[i])
+                        XboxCommand(i, writeBuf, 4);
+        }
+        // Keep Alive 2
+        writeBuf[0] = 0x00;
+        writeBuf[1] = 0x00;
+        writeBuf[2] = 0x0C;
+        writeBuf[3] = 0x1F;
+        for(uint8_t i = 0; i < 4; i++) {
+                if(Xbox360Connected[i])
+                        XboxCommand(i, writeBuf, 4);
+        }
+}
+
+void XBOXRECV::sendChatpadInitIfNeeded() {
+        // ChatpadInit
+        writeBuf[0] = 0x00;
+        writeBuf[1] = 0x00;
+        writeBuf[2] = 0x0C;
+        writeBuf[3] = 0x1B;
+        for(uint8_t i = 0; i < 4; i++) {
+                if(chatpadInitNeeded[i]) {
+                        #ifdef EXTRADEBUG
+                                Notify(PSTR("\r\nSending Chatpad Init to controller"), 0x80);
+                        #endif
+                        XboxCommand(i, writeBuf, 4);
+                        chatpadInitNeeded[i] = false;
+                }
         }
 }
 
