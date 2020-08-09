@@ -501,12 +501,15 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
                         }
 
                         if(chatpadModRaw[controller] != chatpadModRawOld[controller]) {
-                                // Update click state variable
+                                // stateTmp will be 1 for each bit that when pressed *and* released
                                 uint8_t stateTmp = (~chatpadModRaw[controller] & chatpadModRawOld[controller]);
                                 chatpadModState[controller] ^= stateTmp;
 
                                 for (int i = 0; i < __NUM_CHATPAD_LED; i++) {
-                                        setChatpadLed( (ChatpadLEDEnum)i, ((1 << i) & chatpadModState[controller]) != 0, 0);
+                                        if (stateTmp & (1 << i)) {
+                                                // Only change the LED color on state change for that modifier
+                                                setChatpadLed( (ChatpadLEDEnum)i, ((1 << i) & chatpadModState[controller]) != 0, 0);
+                                        }
                                 }
                         }
 
