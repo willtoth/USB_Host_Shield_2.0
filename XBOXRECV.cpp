@@ -19,7 +19,7 @@
 
 #include "XBOXRECV.h"
 // To enable serial debugging see "settings.h"
-//#define EXTRADEBUG // Uncomment to get even more debugging data
+#define EXTRADEBUG // Uncomment to get even more debugging data
 //#define PRINTREPORT // Uncomment to print the report send by the Xbox 360 Controller
 
 XBOXRECV::XBOXRECV(USB *p) :
@@ -416,6 +416,20 @@ void XBOXRECV::printReport(uint8_t controller __attribute__((unused)), uint8_t n
 
 
 void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
+
+#ifdef EXTRADEBUG
+        Notify(PSTR("Received chatpad packet "), 0x80);
+        Notify(PSTR("Controller "), 0x80);
+        Notify(controller, 0x80);
+        Notify(PSTR(": "), 0x80);
+        D_PrintHex<uint8_t > (dataPacket[24], 0x80);
+        D_PrintHex<uint8_t > (dataPacket[25], 0x80);
+        D_PrintHex<uint8_t > (dataPacket[26], 0x80);
+        D_PrintHex<uint8_t > (dataPacket[27], 0x80);
+        Notify(PSTR(" "), 0x80);
+        Notify(PSTR("\r\n"), 0x80);
+#endif
+
         // This function is called anytime received data is identified as chatpad data
         // It will parse the data, and depending on the value, send a keyboard command,
         // adjust a modifier for later use, flag initialization, or note the LED status.
