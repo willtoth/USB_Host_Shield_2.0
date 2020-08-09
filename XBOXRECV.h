@@ -226,6 +226,7 @@ public:
         };
 
         bool getChatpadModifier(ChatpadModifierEnum b, uint8_t controller = 0);
+        bool getChatpadModifierState(ChatpadModifierEnum b, uint8_t controller = 0);
         bool getChatpadClick(ChatpadButtonEnum b, uint8_t controller = 0);
         bool chatpadChanged(uint8_t controller = 0);
 
@@ -295,6 +296,7 @@ private:
         bool chatpadInitNeeded[4] = { true };
         uint8_t chatpadModRaw[4] = {0};
         uint8_t chatpadModState[4] = {0};
+        uint8_t chatpadModStateOld[4] = {0};
         uint8_t chatpadModRawOld[4] = {0};
         uint8_t chatpadModClickState[4] = {0};
         uint8_t chatpadDataPacketLast[4][3];

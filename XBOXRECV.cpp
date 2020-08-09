@@ -502,13 +502,15 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
 
                         if(chatpadModRaw[controller] != chatpadModRawOld[controller]) {
                                 // Update click state variable
-                                chatpadModState[controller] = (chatpadModRaw[controller]) & ((~chatpadModRawOld[controller]));
-                                chatpadModRawOld[controller] = chatpadModRaw[controller];
+                                uint8_t stateTmp = (~chatpadModRaw[controller] & chatpadModRawOld[controller]);
+                                chatpadModState[controller] ^= stateTmp;
 
                                 for (int i = 0; i < __NUM_CHATPAD_LED; i++) {
-                                        setChatpadLed( (ChatpadLEDEnum)i, (1 << i) & chatpadModState[controller]);
+                                        setChatpadLed( (ChatpadLEDEnum)i, ((1 << i) & chatpadModState[controller]) != 0, 0);
                                 }
                         }
+
+                        chatpadModRawOld[controller] = chatpadModRaw[controller];
                 }
         }
         else {
@@ -591,6 +593,10 @@ bool XBOXRECV::buttonChanged(uint8_t controller) {
 
 bool XBOXRECV::getChatpadModifier(ChatpadModifierEnum b, uint8_t controller) {
         return (bool)(chatpadModState[controller] & (1 << b));
+}
+
+bool XBOXRECV::getChatpadModifierState(ChatpadModifierEnum b, uint8_t controller) {
+        return (bool)(chatpadModRaw[controller] & (1 << b));
 }
 
 bool XBOXRECV::chatpadChanged(uint8_t controller) {
