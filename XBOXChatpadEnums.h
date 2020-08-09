@@ -13,11 +13,11 @@
 #ifndef _xbox_chatpad_enums_h_
 #define _xbox_chatpad_enums_h_
 
-enum ChatpadModiferEnum {
-        MODIFER_SHIFT = 0,
-        MODIFER_GREENBUTTON = 1,
-        MODIFER_ORANGEBUTTON = 2,
-        MODIFER_MESSENGER = 3
+enum ChatpadMODIFIEREnum {
+        MODIFIER_SHIFT = 0,
+        MODIFIER_GREENBUTTON = 1,
+        MODIFIER_ORANGEBUTTON = 2,
+        MODIFIER_MESSENGER = 3
 };
 
 enum ChatpadLEDEnum {
