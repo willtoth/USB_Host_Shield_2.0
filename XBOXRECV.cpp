@@ -589,7 +589,7 @@ bool XBOXRECV::buttonChanged(uint8_t controller) {
         return state;
 }
 
-bool XBOXRECV::getChatpadModifier(ChatpadModiferEnum b, uint8_t controller) {
+bool XBOXRECV::getChatpadModifier(ChatpadModifierEnum b, uint8_t controller) {
         return (bool)(chatpadModState[controller] & (1 << b));
 }
 

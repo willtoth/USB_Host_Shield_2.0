@@ -225,7 +225,7 @@ public:
                 pFuncOnInit = funcOnInit;
         };
 
-        bool getChatpadModifier(ChatpadModiferEnum b, uint8_t controller = 0);
+        bool getChatpadModifier(ChatpadModifierEnum b, uint8_t controller = 0);
         bool getChatpadClick(ChatpadButtonEnum b, uint8_t controller = 0);
         bool chatpadChanged(uint8_t controller = 0);
 
