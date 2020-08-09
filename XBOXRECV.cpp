@@ -19,7 +19,7 @@
 
 #include "XBOXRECV.h"
 // To enable serial debugging see "settings.h"
-#define EXTRADEBUG // Uncomment to get even more debugging data
+//#define EXTRADEBUG // Uncomment to get even more debugging data
 //#define PRINTREPORT // Uncomment to print the report send by the Xbox 360 Controller
 
 XBOXRECV::XBOXRECV(USB *p) :
@@ -517,7 +517,17 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
 }
 
 void XBOXRECV::ProcessChatpadKeypress(uint8_t controller, uint8_t value) {
+
+        Notify(PSTR("Received Keypress: "), 0x80);
+        Notify(PSTR("Controller "), 0x80);
+        Notify(controller, 0x80);
+        D_PrintHex<uint8_t > (value, 0x80);
+        Notify(PSTR(" "), 0x80);
+        Notify(PSTR(": "), 0x80);
+        
         value = (((value & 0xF0) - 0x10) >> 1) | ((value & 0x0F) - 1);
+        Notify(PSTR(" Processed into: "), 0x80);
+        D_PrintHex<uint8_t > (value, 0x80);
 
         if (value > __XBOX_CHATPAD_ENUM_MAX) {
                 // Invalid button
@@ -525,6 +535,10 @@ void XBOXRECV::ProcessChatpadKeypress(uint8_t controller, uint8_t value) {
         }
 
         chatpadClickState[controller] |= (((uint64_t)1) << ((uint64_t)value));
+
+        Notify(PSTR("\r\nchatpadClickState: "), 0x80);
+        D_PrintHex<uint64_t > (chatpadClickState[controller], 0x80);
+        Notify(PSTR("\r\n"), 0x80);
 }
 
 uint8_t XBOXRECV::getButtonPress(ButtonEnum b, uint8_t controller) {
