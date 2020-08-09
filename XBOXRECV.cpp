@@ -422,10 +422,19 @@ void XBOXRECV::processChatpadData(uint8_t controller, uint8_t*  dataPacket) {
         Notify(PSTR("Controller "), 0x80);
         Notify(controller, 0x80);
         Notify(PSTR(": "), 0x80);
-        D_PrintHex<uint8_t > (dataPacket[24], 0x80);
-        D_PrintHex<uint8_t > (dataPacket[25], 0x80);
-        D_PrintHex<uint8_t > (dataPacket[26], 0x80);
-        D_PrintHex<uint8_t > (dataPacket[27], 0x80);
+        int numBytes = 0;
+
+        if (dataPacket[24] == 0xF0) {
+                numBytes = 2;
+        } else if (dataPacket[24] == 0x00) {
+                numBytes = 4;
+        }
+
+        for (int i = 0; i < numBytes; i++) {
+                D_PrintHex<uint8_t > (dataPacket[24 + i], 0x80);
+                Notify(PSTR(" "), 0x80);
+        }
+
         Notify(PSTR(" "), 0x80);
         Notify(PSTR("\r\n"), 0x80);
 #endif
