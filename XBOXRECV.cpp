@@ -521,13 +521,16 @@ void XBOXRECV::ProcessChatpadKeypress(uint8_t controller, uint8_t value) {
         Notify(PSTR("Received Keypress: "), 0x80);
         Notify(PSTR("Controller "), 0x80);
         Notify(controller, 0x80);
-        D_PrintHex<uint8_t > (value, 0x80);
+        //D_PrintHex<uint8_t > (value, 0x80);
+        Notify(PSTR(value), 0x80);
         Notify(PSTR(" "), 0x80);
         Notify(PSTR(": "), 0x80);
         
         value = (((value & 0xF0) - 0x10) >> 1) | ((value & 0x0F) - 1);
         Notify(PSTR(" Processed into: "), 0x80);
-        D_PrintHex<uint8_t > (value, 0x80);
+        Notify(PSTR(value), 0x80);
+        //D_PrintHex<uint8_t > (value, 0x80);
+        Notify(PSTR("\r\n"), 0x80);
 
         if (value > __XBOX_CHATPAD_ENUM_MAX) {
                 // Invalid button
